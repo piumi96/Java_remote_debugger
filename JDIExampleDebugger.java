@@ -11,6 +11,8 @@ import com.sun.jdi.Location;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.Value;
+import com.sun.jdi.connect.IllegalConnectorArgumentsException;
+import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
