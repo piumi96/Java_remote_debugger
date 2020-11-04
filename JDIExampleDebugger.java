@@ -22,11 +22,8 @@ import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.StepRequest;
 
+import java.io.*;
 import java.util.Map;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 
 
 public class JDIExampleDebugger {
@@ -88,6 +85,21 @@ AbsentInformationException
         }
     }
 
+    public void fileWriter() throws IOException{
+        File file = new File("Output.json");
+
+        if(file.isFile()){
+            file.delete();
+        }
+
+        file.createNewFile();
+        FileWriter writer = new FileWriter(file);
+
+        writer.write("This is another example");
+        writer.flush();
+        writer.close();
+    }
+
     public static void main(String[] args) throws Exception {
 
         System.out.println("Debugger Start. . . ");
@@ -118,5 +130,6 @@ AbsentInformationException
         } catch (Exception e) {
             e.printStackTrace();
         }
+        debuggerInstance.fileWriter();
     }
 }
