@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JDIExampleDebuggee<Java_remote_debugger_bceef468>",
+            "request": "launch",
+            "mainClass": "JDIExampleDebuggee",
+            "projectName": "Java_remote_debugger_bceef468"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JDIExampleDebugger<Java_remote_debugger_bceef468>",
+            "request": "launch",
+            "mainClass": "JDIExampleDebugger",
+            "projectName": "Java_remote_debugger_bceef468"
+        }
+    ]
+}

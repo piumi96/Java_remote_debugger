@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Java_remote_debugger">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/sa-jdi.jar!/" />
+      <root url="jar://$PROJECT_DIR$/tools.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
