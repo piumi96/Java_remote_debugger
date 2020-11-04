@@ -21,6 +21,8 @@ import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.StepRequest;
+import jdk.nashorn.internal.ir.debug.JSONWriter;
+import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.util.Map;
@@ -87,6 +89,9 @@ AbsentInformationException
 
     public void fileWriter() throws IOException{
         File file = new File("Output.json");
+        JSONObject obj = new JSONObject();
+
+        obj.put("line", "foo");
 
         if(file.isFile()){
             file.delete();
@@ -95,7 +100,7 @@ AbsentInformationException
         file.createNewFile();
         FileWriter writer = new FileWriter(file);
 
-        writer.write("This is another example");
+        writer.write(obj.toJSONString());
         writer.flush();
         writer.close();
     }
