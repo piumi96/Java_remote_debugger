@@ -10,6 +10,7 @@ public class JDIExampleDebuggee {
         add();
 
         System.out.println(total);
+        System.out.println("Debuggee running");
 
 
     }

@@ -85,7 +85,7 @@ public class JDIExampleDebugger {
         }
     }
 
-    public void writeVariablestoJSON(LocatableEvent event, int breakPoint) throws IncompatibleThreadStateException,
+    public void writeVariablesToJSON(LocatableEvent event, int breakPoint) throws IncompatibleThreadStateException,
 AbsentInformationException 
     {
         JSONObject line =  new JSONObject();
@@ -96,9 +96,10 @@ AbsentInformationException
         if(stackFrame.location().toString().contains(debugClass.getName())) {
             Map<LocalVariable, Value> visibleVariables = stackFrame
             .getValues(stackFrame.visibleVariables());
-            //System.out.println("Variables at " + stackFrame.location().toString() +  " > ");
             for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
-                values.put(entry.getKey().name(), entry.getValue().toString());
+                if(!entry.getKey().name().equals("args")) {
+                    values.put(entry.getKey().name(), entry.getValue());
+                }
             }
             line.put(breakpointLines[breakPoint], values);
             JSONArray result = getJsonResult();
@@ -132,7 +133,7 @@ AbsentInformationException
 
         JDIExampleDebugger debuggerInstance = new JDIExampleDebugger();
         debuggerInstance.setDebugClass(JDIExampleDebuggee.class);
-        int[] breakPoints = {8, 12, 19, 22};
+        int[] breakPoints = {8, 12, 13, 19};
         debuggerInstance.setBreakPointLines(breakPoints);
         VirtualMachine vm = null;
         int breakPoint = 0;
@@ -147,7 +148,7 @@ AbsentInformationException
                         debuggerInstance.setBreakPoints(vm, (ClassPrepareEvent)event);
                     }
                     if (event instanceof BreakpointEvent) {
-                        debuggerInstance.writeVariablestoJSON((BreakpointEvent) event, breakPoint);
+                        debuggerInstance.writeVariablesToJSON((BreakpointEvent) event, breakPoint);
                         breakPoint++;
                     }
                     vm.resume();
