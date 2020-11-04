@@ -1,1 +1,1 @@
-{"line":"foo"}
+[{"8":{"args":"instance of java.lang.String[0] (id=108)","a":"5","b":"10"}},{"12":{"a2":"5"}},{"19":{"b2":"10","a2":"5","total2":"15"}},{"22":{"args":"instance of java.lang.String[0] (id=108)","a":"5","total":"15","b":"10"}}]

@@ -22,6 +22,8 @@ import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.StepRequest;
 import jdk.nashorn.internal.ir.debug.JSONWriter;
+import netscape.javascript.JSObject;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.*;
@@ -31,6 +33,12 @@ import java.util.Map;
 public class JDIExampleDebugger {
     private Class debugClass;
     private int[] breakPointLines;
+    private JSONArray jsonResult;
+
+    public JDIExampleDebugger(){
+        JSONArray res = new JSONArray();
+        this.setJsonResult(res);
+    }
 
     public Class getDebugClass() {
         return debugClass;
@@ -47,6 +55,11 @@ public class JDIExampleDebugger {
     public void setBreakPointLines(int[] breakPointLines) {
         this.breakPointLines = breakPointLines;
     }
+
+    public JSONArray getJsonResult() {return this.jsonResult; }
+
+    public void setJsonResult(JSONArray jsonResult) {this.jsonResult = jsonResult; }
+
 
     public VirtualMachine connectAndLaunchVM() throws Exception {
 
@@ -72,26 +85,31 @@ public class JDIExampleDebugger {
         }
     }
 
-    public void displayVariables(LocatableEvent event) throws IncompatibleThreadStateException, 
+    public void writeVariablestoJSON(LocatableEvent event, int breakPoint) throws IncompatibleThreadStateException,
 AbsentInformationException 
     {
+        JSONObject line =  new JSONObject();
+        JSONObject values = new JSONObject();
+        int[] breakpointLines = getBreakPointLines();
+
         StackFrame stackFrame = event.thread().frame(0);
         if(stackFrame.location().toString().contains(debugClass.getName())) {
             Map<LocalVariable, Value> visibleVariables = stackFrame
             .getValues(stackFrame.visibleVariables());
-            System.out.println("Variables at " + stackFrame.location().toString() +  " > ");
+            //System.out.println("Variables at " + stackFrame.location().toString() +  " > ");
             for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
-                System.out.println(entry.getKey().name() + " = " + entry.getValue());
+                values.put(entry.getKey().name(), entry.getValue().toString());
             }
-            System.out.println("");
+            line.put(breakpointLines[breakPoint], values);
+            JSONArray result = getJsonResult();
+            result.add(line);
+            setJsonResult(result);
+            System.out.println(line);
         }
     }
 
-    public void fileWriter() throws IOException{
+    public void fileWriter(JSONArray jResult) throws IOException{
         File file = new File("Output.json");
-        JSONObject obj = new JSONObject();
-
-        obj.put("line", "foo");
 
         if(file.isFile()){
             file.delete();
@@ -100,7 +118,10 @@ AbsentInformationException
         file.createNewFile();
         FileWriter writer = new FileWriter(file);
 
-        writer.write(obj.toJSONString());
+        if(jResult != null){
+            writer.write(jResult.toJSONString());
+        }
+
         writer.flush();
         writer.close();
     }
@@ -114,6 +135,7 @@ AbsentInformationException
         int[] breakPoints = {8, 12, 19, 22};
         debuggerInstance.setBreakPointLines(breakPoints);
         VirtualMachine vm = null;
+        int breakPoint = 0;
         
         try {
             vm = debuggerInstance.connectAndLaunchVM();
@@ -125,7 +147,8 @@ AbsentInformationException
                         debuggerInstance.setBreakPoints(vm, (ClassPrepareEvent)event);
                     }
                     if (event instanceof BreakpointEvent) {
-                        debuggerInstance.displayVariables((BreakpointEvent) event);
+                        debuggerInstance.writeVariablestoJSON((BreakpointEvent) event, breakPoint);
+                        breakPoint++;
                     }
                     vm.resume();
                 }
@@ -135,6 +158,7 @@ AbsentInformationException
         } catch (Exception e) {
             e.printStackTrace();
         }
-        debuggerInstance.fileWriter();
+        JSONArray jResult = debuggerInstance.getJsonResult();
+        debuggerInstance.fileWriter(jResult);
     }
 }
