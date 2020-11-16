@@ -1,4 +1,4 @@
-public class JDIExampleDebuggee {
+public class Debuggee {
     public static void main(String[] args) {
         
         int a = 5;

@@ -1,1 +1,1 @@
-[{"8":{"a":5,"b":10}},{"12":{}},{"13":{"a":5,"b":10,"total":15}},{"19":{"a":5,"b":10,"total":15}}]
+[{"Line":"Debuggee:8","Value":{"a":5,"b":10}},{"Line":"Debuggee:19","Value":{}},{"Line":"Debuggee:23","Value":{"b2":10,"a2":5,"total2":15}},{"Line":"Debuggee:12","Value":{"a":5,"b":10,"total":15}},{"Line":"Debuggee:13","Value":{"a":5,"b":10,"total":15}}]

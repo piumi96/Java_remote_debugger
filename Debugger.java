@@ -11,31 +11,26 @@ import com.sun.jdi.Location;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.Value;
-import com.sun.jdi.connect.IllegalConnectorArgumentsException;
-import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.LocatableEvent;
-import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.request.BreakpointRequest;
-import com.sun.jdi.request.StepRequest;
-import jdk.nashorn.internal.ir.debug.JSONWriter;
-import netscape.javascript.JSObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.util.Map;
+import java.lang.String;
 
 
-public class JDIExampleDebugger {
+public class Debugger {
     private Class debugClass;
     private int[] breakPointLines;
     private JSONArray jsonResult;
 
-    public JDIExampleDebugger(){
+    public Debugger(){
         JSONArray res = new JSONArray();
         this.setJsonResult(res);
     }
@@ -61,6 +56,7 @@ public class JDIExampleDebugger {
     public void setJsonResult(JSONArray jsonResult) {this.jsonResult = jsonResult; }
 
 
+    //Create connection with VM
     public VirtualMachine connectAndLaunchVM() throws Exception {
 
         LaunchingConnector launchingConnector = Bootstrap.virtualMachineManager()
@@ -70,12 +66,14 @@ public class JDIExampleDebugger {
         return launchingConnector.launch(arguments);
     }
 
+    //Create classPrepareRequest on VM to enable debugging
     public void enableClassPrepareRequest(VirtualMachine vm) {
         ClassPrepareRequest classPrepareRequest = vm.eventRequestManager().createClassPrepareRequest();
         classPrepareRequest.addClassFilter(debugClass.getName());
         classPrepareRequest.enable();
     }
 
+    //Create breakPointRequests at each breakpoint
     public void setBreakPoints(VirtualMachine vm, ClassPrepareEvent event) throws AbsentInformationException {
         ClassType classType = (ClassType) event.referenceType();
         for(int lineNumber: breakPointLines) {
@@ -85,6 +83,7 @@ public class JDIExampleDebugger {
         }
     }
 
+    //Write debug information into JSON Object
     public void writeVariablesToJSON(LocatableEvent event, int breakPoint) throws IncompatibleThreadStateException,
 AbsentInformationException 
     {
@@ -101,14 +100,18 @@ AbsentInformationException
                     values.put(entry.getKey().name(), entry.getValue());
                 }
             }
-            line.put(breakpointLines[breakPoint], values);
+            System.out.println("line: " + stackFrame.location().toString());
+            System.out.println("values: " + values);
+
+            line.put("Line", stackFrame.location().toString());
+            line.put("Value", values);
             JSONArray result = getJsonResult();
             result.add(line);
             setJsonResult(result);
-            System.out.println(line);
         }
     }
 
+    //Write debug information to Output.json
     public void fileWriter(JSONArray jResult) throws IOException{
         File file = new File("Output.json");
 
@@ -131,9 +134,9 @@ AbsentInformationException
 
         System.out.println("Debugger Start. . . ");
 
-        JDIExampleDebugger debuggerInstance = new JDIExampleDebugger();
-        debuggerInstance.setDebugClass(JDIExampleDebuggee.class);
-        int[] breakPoints = {8, 12, 13, 19};
+        Debugger debuggerInstance = new Debugger();
+        debuggerInstance.setDebugClass(Debuggee.class);
+        int[] breakPoints = {8, 12, 13, 19, 23};
         debuggerInstance.setBreakPointLines(breakPoints);
         VirtualMachine vm = null;
         int breakPoint = 0;
