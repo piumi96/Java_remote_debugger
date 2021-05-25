@@ -1,16 +1,7 @@
-import com.sun.jdi.Bootstrap;
-import com.sun.jdi.VirtualMachine;
+import com.sun.jdi.*;
 import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.request.ClassPrepareRequest;
-import com.sun.jdi.AbsentInformationException;
-import com.sun.jdi.ClassType;
-import com.sun.jdi.IncompatibleThreadStateException;
-import com.sun.jdi.LocalVariable;
-import com.sun.jdi.Location;
-import com.sun.jdi.StackFrame;
-import com.sun.jdi.VMDisconnectedException;
-import com.sun.jdi.Value;
 import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
@@ -77,9 +68,14 @@ public class Debugger {
     public void setBreakPoints(VirtualMachine vm, ClassPrepareEvent event) throws AbsentInformationException {
         ClassType classType = (ClassType) event.referenceType();
         for(int lineNumber: breakPointLines) {
-            Location location = classType.locationsOfLine(lineNumber).get(0);
-            BreakpointRequest bpReq = vm.eventRequestManager().createBreakpointRequest(location);
-            bpReq.enable();
+            try{
+                Location location = classType.locationsOfLine(lineNumber).get(0);
+                BreakpointRequest bpReq = vm.eventRequestManager().createBreakpointRequest(location);
+                bpReq.enable();
+            }catch(IndexOutOfBoundsException e){
+                System.out.println(e);
+            }
+
         }
     }
 
@@ -89,31 +85,36 @@ AbsentInformationException
     {
         JSONObject line =  new JSONObject();
         JSONObject values = new JSONObject();
+
         int[] breakpointLines = getBreakPointLines();
+
+        Method method = event.location().method();
 
         StackFrame stackFrame = event.thread().frame(0);
         if(stackFrame.location().toString().contains(debugClass.getName())) {
-            Map<LocalVariable, Value> visibleVariables = stackFrame
-            .getValues(stackFrame.visibleVariables());
+            Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(stackFrame.visibleVariables());
             for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
                 if(!entry.getKey().name().equals("args")) {
                     values.put(entry.getKey().name(), entry.getValue());
+
                 }
             }
-            System.out.println("line: " + stackFrame.location().toString());
-            System.out.println("values: " + values);
 
             line.put("Line", stackFrame.location().toString());
+            line.put("Function", method.name());
             line.put("Value", values);
             JSONArray result = getJsonResult();
             result.add(line);
             setJsonResult(result);
+
+            System.out.println(line.toString());
         }
     }
 
     //Write debug information to Output.json
     public void fileWriter(JSONArray jResult) throws IOException{
         File file = new File("Output.json");
+        //Gson gson = new GsonBuilder();
 
         if(file.isFile()){
             file.delete();
@@ -136,7 +137,10 @@ AbsentInformationException
 
         Debugger debuggerInstance = new Debugger();
         debuggerInstance.setDebugClass(Debuggee.class);
-        int[] breakPoints = {8, 12, 13, 19, 23};
+
+        //Line numbers of debuggee class to act as breakpoints.
+        int[] breakPoints = {5, 7, 8, 9, 10, 12, 13, 15,16, 19, 25};
+
         debuggerInstance.setBreakPointLines(breakPoints);
         VirtualMachine vm = null;
         int breakPoint = 0;
@@ -147,6 +151,7 @@ AbsentInformationException
             EventSet eventSet = null;
             while ((eventSet = vm.eventQueue().remove()) != null) {
                 for (Event event : eventSet) {
+                    System.out.println(event);
                     if (event instanceof ClassPrepareEvent) {
                         debuggerInstance.setBreakPoints(vm, (ClassPrepareEvent)event);
                     }
