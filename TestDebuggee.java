@@ -1,15 +1,10 @@
 public class TestDebuggee {
 
     public static void main(String[] args) {
-        int a = 3;
-        int b = 4;
-        int sum = 0;
-        if(a<b) {
-            sum = a + b;
-        }
-        for(int i=0; i<a; i++){
-            sum++;
-        }
-        System.out.println(sum);
+        String name = "piumi";
+        System.out.println(name);
+
+        int a = 10;
+        System.out.println(a);
     }
 }
